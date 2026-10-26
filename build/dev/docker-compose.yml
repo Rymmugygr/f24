@@ -1,0 +1,8 @@
+services:
+  backend:
+    container_name: php-fpm
+    build:
+      context: ../../
+      dockerfile: build/dev/php-fpm/Dockerfile
+    volumes:
+      - ../..:/var/www
