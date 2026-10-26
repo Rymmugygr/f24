@@ -2,7 +2,7 @@
 
 # Running dev environment
 up:
-	docker-compose -f build/dev/docker-compose.yml -p f24 up --build --force-recreate --remove-orphans -d backend
+	docker-compose -f build/dev/docker-compose.yml -p f24 up --build --force-recreate --remove-orphans -d gateway
 
 # Stopping dev environment
 down:
