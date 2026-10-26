@@ -1,23 +1,20 @@
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
 # PHP
 *.log
 *.cache
 *.phpunit.result.cache
 
 # Composer
-/vendor/
 composer.lock
-
-# Data and Cache
-/var/
-!.env.local
-!.env*.local
-
-# Logs
-/var/log/*
-!.gitkeep
-
-# Resources
-/public/bundles/
 
 # IDEs
 .idea/
@@ -29,6 +26,3 @@ Thumbs.db
 ehthumbs.db
 Icon?
 Desktop.ini
-
-/.env
-/.env.local.php

@@ -1,8 +1,13 @@
 services:
   backend:
-    container_name: php-fpm
+    container_name: backend
     build:
       context: ../../
       dockerfile: build/dev/php-fpm/Dockerfile
     volumes:
       - ../..:/var/www
+    user: "www-data"
+
+networks:
+    f24-network:
+        driver: bridge

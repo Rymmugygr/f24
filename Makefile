@@ -8,6 +8,6 @@ up:
 down:
 	docker-compose -f build/dev/docker-compose.yml -p f24 down
 
-# Create empty project
-# create:
-#	docker-compose -f build/dev/docker-compose.yml -p f24 build && docker-compose -f build/dev/docker-compose.yml -p f24 run backend composer create-project symfony/skeleton:"7.4.*" a24
+# Install requirements
+install:
+	make up && docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend composer install
