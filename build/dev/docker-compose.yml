@@ -8,9 +8,11 @@ services:
       - ../..:/var/www
     user: "www-data"
     depends_on:
-        - db
-        - broker
-        - redis
+      - db
+      - broker
+      - redis
+    networks:
+      - "f24-network"
 
   gateway:
     container_name: gateway
@@ -22,6 +24,8 @@ services:
       - ../../public/bundles/:/var/www/public/bundles/
     depends_on:
       - backend
+    networks:
+      - "f24-network"
 
   db:
     container_name: db
@@ -34,6 +38,8 @@ services:
       POSTGRES_PASSWORD: pass
     ports:
       - "5432:5432"
+    networks:
+        - "f24-network"
 
   broker:
     container_name: broker
@@ -46,6 +52,8 @@ services:
       - "15672:15672"
     volumes:
       - rmqdata:/var/lib/rabbitmq
+    networks:
+        - "f24-network"
 
   redis:
     container_name: redis
@@ -53,6 +61,8 @@ services:
     ports:
       - "6379:6379"
     command: ["redis-server", "--save", "", "--appendonly", "no", "--requirepass", "pass"]
+    networks:
+        - "f24-network"
 
 networks:
   f24-network:
