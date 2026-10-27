@@ -1,0 +1,80 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Freedom24 Test Assignment API
+            version: '1.0'
+            basePath: '/api/v1.0'
+        components:
+            schemas:
+                CurrencyEnum:
+                    type: string
+                    enum: [
+                        'RUR', 'AUD', 'AZN', 'DZD', 'GBP', 'AMD', 'BHD', 'BYN', 'BOB', 'BRL', 'HUF', 'VND', 'HKD', 'GEL',
+                        'DKK', 'AED', 'USD', 'EUR', 'EGP', 'INR', 'IDR', 'IRR', 'KZT', 'CAD', 'QAR', 'KGS', 'CNY', 'CUP',
+                        'MDL', 'MNT', 'NGN', 'NZD', 'NOK', 'OMR', 'PLN', 'SAR', 'RON', 'XDR', 'SGD', 'TJS', 'THB', 'BDT',
+                        'TRY', 'TMT', 'UZS', 'UAH', 'CZK', 'SEK', 'CHF', 'ETB', 'RSD', 'ZAR', 'KRW', 'JPY', 'MMK'
+                    ]
+                ErrorResponse:
+                    type: object
+                    properties:
+                        message:
+                            type: string
+                            example: 'Error message'
+                CurrencyResponse:
+                    type: object
+                    properties:
+                        rate:
+                            type: number
+                            format: float
+                            example: 1.12345
+                        diff:
+                            type: number
+                            format: float
+                            example: -0.01234
+        paths:
+            '/api/v1.0/currency':
+                get:
+                    summary: 'Get the currency rate'
+                    tag:
+                        name: 'Currency'
+                    parameters:
+                        - name: date
+                          description: 'The date in format YYYY-MM-DD'
+                          in: query
+                          required: true
+                          schema:
+                            type: string
+                            format: date
+                        - name: to
+                          description: 'The currency which you want to get for'
+                          in: query
+                          required: true
+                          schema:
+                            $ref: '#/components/schemas/CurrencyEnum'
+                        - name: from
+                          description: 'The currency which you want to get from'
+                          in: query
+                          schema:
+                            $ref: '#/components/schemas/CurrencyEnum'
+                    responses:
+                        '200':
+                            description: 'Return the currency exchange rate for a certain date'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/CurrencyResponse'
+                        '400':
+                            description: 'Invalid input parameter'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/ErrorResponse'
+                        '404':
+                            description: 'Could not find the exchange rate for a certain date'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/ErrorResponse'
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api/v1.0(?!/doc$) # Accepts routes under /api/v1.0 except /api/v1.0/doc

@@ -1,0 +1,62 @@
+<?php declare(strict_types=1);
+
+namespace App\Config;
+
+enum Currency: string
+{
+    case RUR = 'RUR';
+    case AUD = 'AUD';
+    case AZN = 'AZN';
+    case DZD = 'DZD';
+    case GBP = 'GBP';
+    case AMD = 'AMD';
+    case BHD = 'BHD';
+    case BYN = 'BYN';
+    case BOB = 'BOB';
+    case BRL = 'BRL';
+    case HUF = 'HUF';
+    case VND = 'VND';
+    case HKD = 'HKD';
+    case GEL = 'GEL';
+    case DKK = 'DKK';
+    case AED = 'AED';
+    case USD = 'USD';
+    case EUR = 'EUR';
+    case EGP = 'EGP';
+    case INR = 'INR';
+    case IDR = 'IDR';
+    case IRR = 'IRR';
+    case KZT = 'KZT';
+    case CAD = 'CAD';
+    case QAR = 'QAR';
+    case KGS = 'KGS';
+    case CNY = 'CNY';
+    case CUP = 'CUP';
+    case MDL = 'MDL';
+    case MNT = 'MNT';
+    case NGN = 'NGN';
+    case NZD = 'NZD';
+    case NOK = 'NOK';
+    case OMR = 'OMR';
+    case PLN = 'PLN';
+    case SAR = 'SAR';
+    case RON = 'RON';
+    case XDR = 'XDR';
+    case SGD = 'SGD';
+    case TJS = 'TJS';
+    case THB = 'THB';
+    case BDT = 'BDT';
+    case TRY = 'TRY';
+    case TMT = 'TMT';
+    case UZS = 'UZS';
+    case UAH = 'UAH';
+    case CZK = 'CZK';
+    case SEK = 'SEK';
+    case CHF = 'CHF';
+    case ETB = 'ETB';
+    case RSD = 'RSD';
+    case ZAR = 'ZAR';
+    case KRW = 'KRW';
+    case JPY = 'JPY';
+    case MMK = 'MMK';
+}
