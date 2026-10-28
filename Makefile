@@ -10,4 +10,8 @@ down:
 
 # Install requirements
 install:
-	make up && docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend composer install
+	docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend composer install
+
+# Run tests
+test:
+	docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend vendor/bin/phpunit tests/Service
