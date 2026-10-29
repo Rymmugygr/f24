@@ -25,12 +25,12 @@ nelmio_api_doc:
                     properties:
                         rate:
                             type: number
-                            format: float
-                            example: 1.12345
+                            format: string
+                            example: "1.12345"
                         diff:
                             type: number
-                            format: float
-                            example: -0.01234
+                            format: string
+                            example: "-0.01234"
         paths:
             '/api/v1.0/currency':
                 get:
