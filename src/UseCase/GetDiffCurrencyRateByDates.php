@@ -35,8 +35,8 @@ class GetDiffCurrencyRateByDates
         $prevValTo = $this->get($prevDate, $toCurrencyCode);
 
         if ($currValFrom === null || $currValTo === null || $prevValFrom === null || $prevValTo === null) {
-            $msg = "Prevent day {$prevValFrom} -> {$prevValTo} ({$prevDate->format('Y-m-d')}) " .
-                "Current day {$prevValFrom} -> {$prevValTo} ({$prevDate->format('Y-m-d')})";
+            $msg = "Prevent day ({$prevDate->format('Y-m-d')}) {$prevValFrom} -> {$prevValTo} ({$fromCurrencyCode} -> {$toCurrencyCode}) " .
+                "Current day ({$currDate->format('Y-m-d')}) {$currValFrom} -> {$currValTo} ({$fromCurrencyCode} -> {$toCurrencyCode})";
             $this->logger->error("GetDiffCurrencyRateByDates: Insufficient data for calculation. {$msg}");
 
             throw new UseCaseExecuteException("Insufficient data for calculation");
