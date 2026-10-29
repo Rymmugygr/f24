@@ -10,8 +10,6 @@ use Psr\Log\LoggerInterface;
 
 class GetDailyCurrencyRates
 {
-    private const RATE_SCALE = 10;
-
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly Client $client,
@@ -35,10 +33,16 @@ class GetDailyCurrencyRates
             throw new RequestException("UseCase GetDailyCurrencyRates error: " . $e->getMessage(), $e->getCode(), $e);
         }
 
-        $rates = [];
+        /**
+         * TODO: довольно грязный хак, и выглядит как будто ему тут не место
+         * Добавлен для упрощения работы с российскими рублями, в том числе до деноминации 1998
+         */
+        $rates = [
+            'RUR' => 10_000_000,
+            'RUB' => 10_000_000_000,
+        ];
         foreach ($response->getCurrencies() as $dto) {
-            $decimal = self::toDecimal($dto->getVUnitRate());
-            $rate = $decimal === null ? null : self::toRate($decimal);
+            $rate = $dto->getRate();
             // Валюты с нераспознанным курсом пропускаем, чтобы не сохранить некорректное значение
             if ($rate === null) {
                 $this->logger->warning("UseCase GetDailyCurrencyRates error: unsupported value " . $dto->getVUnitRate());
@@ -55,49 +59,5 @@ class GetDailyCurrencyRates
         $this->repository->saveRates($date, $rates);
 
         return $response;
-    }
-
-    /**
-     * Преобразует число из экспонентциальной формы ("4,79492E-05") в десятичную форму ("0.0000479492")
-     * Если не удалось - возвращает null
-     */
-    private static function toDecimal(string $value): ?string
-    {
-        if (!preg_match('/^(\d+)(?:,(\d+))?(?:E([+-]?\d+))?$/i', trim($value), $m)) {
-            return null;
-        }
-
-        $digits = $m[1] . ($m[2] ?? '');
-        $point = strlen($m[1]) + (int)($m[3] ?? 0);
-
-        if ($point <= 0) {
-            $digits = str_repeat('0', 1 - $point) . $digits;
-            $point = 1;
-        } elseif ($point > strlen($digits)) {
-            $digits = str_pad($digits, $point, '0');
-        }
-
-        $integer = ltrim(substr($digits, 0, $point), '0') ?: '0';
-        $fraction = rtrim(substr($digits, $point), '0');
-
-        return $fraction === '' ? $integer : "{$integer}.{$fraction}";
-    }
-
-    /**
-     * Преобразует десятичную строку в целое число с фиксированной точностью RATE_SCALE знаков
-     * (целая часть × 10^RATE_SCALE + дробная часть, дополненная нулями справа до RATE_SCALE знаков).
-     * Если не удалось - возвращает null
-     */
-    private static function toRate(string $decimal): ?int
-    {
-        [$integer, $fraction] = explode('.', $decimal) + [1 => ''];
-
-        $rate = ltrim($integer . str_pad(substr($fraction, 0, self::RATE_SCALE), self::RATE_SCALE, '0'), '0') ?: '0';
-
-        if ((string)(int)$rate !== $rate) {
-            return null;
-        }
-
-        return (int)$rate;
     }
 }

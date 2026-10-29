@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\Tests\UseCase;
+namespace App\Tests\Service\Cbr\Dto\DailyCurrency;
 
-use App\UseCase\GetDailyCurrencyRates;
+use App\Service\Cbr\Dto\DailyCurrency\Currency;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-final class GetDailyCurrencyRatesTest extends TestCase
+final class CurrencyTest extends TestCase
 {
     public static function toDecimalProvider(): iterable
     {
@@ -85,9 +85,45 @@ final class GetDailyCurrencyRatesTest extends TestCase
         self::assertNull($this->invoke('toRate', $decimal));
     }
 
+    public static function getRateProvider(): iterable
+    {
+        yield 'zero' => ['0', 0];
+        yield 'integer' => ['150', 1_500_000_000_000];
+        yield 'comma separator' => ['84,9048', 849_048_000_000];
+        yield 'exponent negative' => ['4,79492E-05', 479_492];
+        yield 'exponent positive' => ['1,5E2', 1_500_000_000_000];
+        yield 'fraction longer than precision is truncated' => ['1,01234567891', 10_123_456_789];
+    }
+
+    #[DataProvider('getRateProvider')]
+    public function testGetRate(string $vUnitRate, int $expected): void
+    {
+        self::assertSame($expected, $this->createCurrency($vUnitRate)->getRate());
+    }
+
+    public static function getRateInvalidProvider(): iterable
+    {
+        yield 'empty' => [''];
+        yield 'dot separator' => ['84.9048'];
+        yield 'max int overflow' => ['922337203,6854775808'];
+    }
+
+    #[DataProvider('getRateInvalidProvider')]
+    public function testGetRateReturnsNullOnInvalidValue(string $vUnitRate): void
+    {
+        self::assertNull($this->createCurrency($vUnitRate)->getRate());
+    }
+
+    private function createCurrency(string $vUnitRate): Currency
+    {
+        $currency = new Currency();
+        (new \ReflectionProperty(Currency::class, 'vUnitRate'))->setValue($currency, $vUnitRate);
+        return $currency;
+    }
+
     private function invoke(string $method, string $value): mixed
     {
-        $reflection = new \ReflectionClass(GetDailyCurrencyRates::class);
+        $reflection = new \ReflectionClass(Currency::class);
         return $reflection->getMethod($method)->invoke(null, $value);
     }
 }

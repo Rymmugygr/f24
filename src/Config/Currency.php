@@ -2,9 +2,14 @@
 
 namespace App\Config;
 
+/**
+ * TODO: по сути используется только для валидации, что может быть не оправдано, ибо список валют от cbr.ru менялся с течением времени
+ * А еще этот список опосредованно дублируется в config/packages/nelmio_api_doc.yaml для документации, что тоже не очень красиво
+ */
 enum Currency: string
 {
     case RUR = 'RUR';
+    case RUB = 'RUB';
     case AUD = 'AUD';
     case AZN = 'AZN';
     case DZD = 'DZD';

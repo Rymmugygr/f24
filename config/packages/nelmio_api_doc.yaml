@@ -9,10 +9,10 @@ nelmio_api_doc:
                 CurrencyEnum:
                     type: string
                     enum: [
-                        'RUR', 'AUD', 'AZN', 'DZD', 'GBP', 'AMD', 'BHD', 'BYN', 'BOB', 'BRL', 'HUF', 'VND', 'HKD', 'GEL',
-                        'DKK', 'AED', 'USD', 'EUR', 'EGP', 'INR', 'IDR', 'IRR', 'KZT', 'CAD', 'QAR', 'KGS', 'CNY', 'CUP',
-                        'MDL', 'MNT', 'NGN', 'NZD', 'NOK', 'OMR', 'PLN', 'SAR', 'RON', 'XDR', 'SGD', 'TJS', 'THB', 'BDT',
-                        'TRY', 'TMT', 'UZS', 'UAH', 'CZK', 'SEK', 'CHF', 'ETB', 'RSD', 'ZAR', 'KRW', 'JPY', 'MMK'
+                        'RUR', 'RUB', 'AUD', 'AZN', 'DZD', 'GBP', 'AMD', 'BHD', 'BYN', 'BOB', 'BRL', 'HUF', 'VND', 'HKD',
+                        'GEL', 'DKK', 'AED', 'USD', 'EUR', 'EGP', 'INR', 'IDR', 'IRR', 'KZT', 'CAD', 'QAR', 'KGS', 'CNY',
+                        'CUP', 'MDL', 'MNT', 'NGN', 'NZD', 'NOK', 'OMR', 'PLN', 'SAR', 'RON', 'XDR', 'SGD', 'TJS', 'THB',
+                        'BDT', 'TRY', 'TMT', 'UZS', 'UAH', 'CZK', 'SEK', 'CHF', 'ETB', 'RSD', 'ZAR', 'KRW', 'JPY', 'MMK'
                     ]
                 ErrorResponse:
                     type: object
