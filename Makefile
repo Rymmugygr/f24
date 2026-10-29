@@ -14,4 +14,8 @@ install:
 
 # Run tests
 test:
-	docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend vendor/bin/phpunit tests/Service
+	docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend vendor/bin/phpunit tests
+
+# Run migrations
+migrate:
+	docker-compose -f build/dev/docker-compose.yml -p f24 run --rm backend bin/console doctrine:migrations:migrate

@@ -67,7 +67,7 @@ class Client
      * @throws ClientExceptionInterface
      * @throws XmlParseException
      */
-    public function getDailyCurrency(\DateTimeImmutable $date) : DailyCurrencyResponse
+    public function getDailyCurrency(\DateTimeInterface $date) : DailyCurrencyResponse
     {
         $url = str_replace("{date}", $date->format(self::DATE_FORMAT), self::GET_DAILY_CURRENCY);
 

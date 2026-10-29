@@ -30,6 +30,16 @@ class Currency
     private string $vUnitRate;
 
     /**
+     * Возвращает внутренний идентификатор валюты в ЦБ
+     *
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
      * Возвращает цифровой ISO код валюты
      *
      * @return string
@@ -57,6 +67,16 @@ class Currency
     public function getNominal(): int
     {
         return $this->nominal;
+    }
+
+    /**
+     * Возвращает название валюты
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**
