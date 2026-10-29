@@ -31,12 +31,52 @@ nelmio_api_doc:
                             type: number
                             format: string
                             example: "-0.01234"
+                HealthResponse:
+                    type: object
+                    properties:
+                        status:
+                            type: string
+                            example: 'ok'
         paths:
+            '/api/v1.0/healthz':
+                get:
+                    summary: 'Check that the application is up'
+                    tags: ['Service']
+                    responses:
+                        '200':
+                            description: 'The application is up and handles requests'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/HealthResponse'
+            '/api/v1.0/metrics':
+                get:
+                    summary: 'Get the number of messages in RabbitMQ queues'
+                    description: 'Returns metrics in Prometheus text format for queues currency_daily and currency_daily_failed'
+                    tags: ['Service']
+                    responses:
+                        '200':
+                            description: 'Number of messages in each queue'
+                            content:
+                                text/plain:
+                                    schema:
+                                        type: string
+                                        example: |
+                                            # HELP rabbitmq_queue_messages Number of messages in the RabbitMQ queue
+                                            # TYPE rabbitmq_queue_messages gauge
+                                            rabbitmq_queue_messages{queue="currency_daily"} 0
+                                            rabbitmq_queue_messages{queue="currency_daily_failed"} 0
+                        '503':
+                            description: 'RabbitMQ is unavailable'
+                            content:
+                                text/plain:
+                                    schema:
+                                        type: string
+                                        example: 'Failed to receive queue metrics'
             '/api/v1.0/currency':
                 get:
                     summary: 'Get the currency rate'
-                    tag:
-                        name: 'Currency'
+                    tags: ['Currency']
                     parameters:
                         - name: date
                           description: 'The date in format YYYY-MM-DD'
@@ -45,15 +85,15 @@ nelmio_api_doc:
                           schema:
                             type: string
                             format: date
+                        - name: from
+                          description: 'The currency which you want to get from'
+                          in: query
+                          schema:
+                            $ref: '#/components/schemas/CurrencyEnum'
                         - name: to
                           description: 'The currency which you want to get for'
                           in: query
                           required: true
-                          schema:
-                            $ref: '#/components/schemas/CurrencyEnum'
-                        - name: from
-                          description: 'The currency which you want to get from'
-                          in: query
                           schema:
                             $ref: '#/components/schemas/CurrencyEnum'
                     responses:
@@ -69,7 +109,7 @@ nelmio_api_doc:
                                 application/json:
                                     schema:
                                         $ref: '#/components/schemas/ErrorResponse'
-                        '404':
+                        '500':
                             description: 'Could not find the exchange rate for a certain date'
                             content:
                                 application/json:

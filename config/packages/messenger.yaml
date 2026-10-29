@@ -14,7 +14,7 @@ framework:
                         type: direct
                         default_publish_routing_key: failed
                     queues:
-                        failed:
+                        currency_daily_failed:
                             binding_keys: [failed]
 
             currency_daily:

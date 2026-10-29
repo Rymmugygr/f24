@@ -59,16 +59,12 @@ class GetDiffCurrencyRateByDates
         if ($val === null) {
             $this->logger->info("Load currency rates for '{$date->format('Y-m-d')}'");
             try {
-                $res = $this->getDailyCurrencyRates->execute($date);
+                $this->getDailyCurrencyRates->execute($date);
             } catch (\Exception $e) {
                 $this->logger->error("failed to receive exchange rates for '{$date->format('Y-m-d')}': {$e->getMessage()}");
                 return null;
             }
-            foreach ($res->getCurrencies() as $currency) {
-                if ($currency->getCharCode() === $currencyCode) {
-                    $val = $currency->getRate();
-                }
-            }
+            $val = $this->currencyRepository->getRate($date, $currencyCode);
         }
         return $val;
     }
