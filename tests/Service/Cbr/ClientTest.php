@@ -9,6 +9,8 @@ use App\Service\Cbr\Exception\XmlParseException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\InMemoryStore;
 
 final class ClientTest extends TestCase
 {
@@ -55,7 +57,7 @@ XML;
         $response = new MockResponse(self::DAILY_XML);
         $httpClient = new MockHttpClient($response);
 
-        (new Client($httpClient))->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
+        self::createClient($httpClient)->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
 
         self::assertSame(1, $httpClient->getRequestsCount());
         self::assertSame('GET', $response->getRequestMethod());
@@ -66,7 +68,7 @@ XML;
     {
         $httpClient = new MockHttpClient(new MockResponse(self::DAILY_XML));
 
-        $result = (new Client($httpClient))->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
+        $result = self::createClient($httpClient)->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
 
         self::assertSame('10.10.2026', $result->getDate()?->format(DailyCurrencyResponse::DATE_FORMAT));
 
@@ -97,7 +99,7 @@ XML;
         $xml = '<?xml version="1.0" encoding="UTF-8"?><ValCurs Date="10.10.2026" name="Foreign Currency Market"></ValCurs>';
         $httpClient = new MockHttpClient(new MockResponse($xml));
 
-        $result = (new Client($httpClient))->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
+        $result = self::createClient($httpClient)->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
 
         self::assertSame('10.10.2026', $result->getDate()?->format(DailyCurrencyResponse::DATE_FORMAT));
         self::assertCount(0, $result->getCurrencies());
@@ -110,7 +112,7 @@ XML;
         $this->expectException(RequestException::class);
         $this->expectExceptionMessage('returned status code 500');
 
-        (new Client($httpClient))->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
+        self::createClient($httpClient)->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
     }
 
     public function testThrowRequestExceptionTransportError(): void
@@ -120,7 +122,7 @@ XML;
         $this->expectException(RequestException::class);
         $this->expectExceptionMessage('Could not resolve host: cbr.ru');
 
-        (new Client($httpClient))->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
+        self::createClient($httpClient)->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
     }
 
     public function testThrowXmlParseExceptionInvalidXml(): void
@@ -129,6 +131,35 @@ XML;
 
         $this->expectException(XmlParseException::class);
 
-        (new Client($httpClient))->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
+        self::createClient($httpClient)->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
+    }
+
+    public function testReleaseLockAfterRequest(): void
+    {
+        $lockFactory = new LockFactory(new InMemoryStore());
+        $httpClient = new MockHttpClient(new MockResponse(self::DAILY_XML));
+
+        (new Client($httpClient, $lockFactory))->getDailyCurrency(new \DateTimeImmutable('2026-10-10'));
+
+        self::assertTrue($lockFactory->createLock('cbr:request')->acquire());
+    }
+
+    public function testReleaseLockAfterFailedRequest(): void
+    {
+        $lockFactory = new LockFactory(new InMemoryStore());
+        $httpClient = new MockHttpClient(new MockResponse('Internal Server Error', ['http_code' => 500]));
+
+        try {
+            (new Client($httpClient, $lockFactory))->getDailyCurrency(new \DateTimeImmutable('2026-10-28'));
+            $this->fail('Ожидалось исключение RequestException');
+        } catch (RequestException) {
+        }
+
+        self::assertTrue($lockFactory->createLock('cbr:request')->acquire());
+    }
+
+    private static function createClient(MockHttpClient $httpClient): Client
+    {
+        return new Client($httpClient, new LockFactory(new InMemoryStore()));
     }
 }

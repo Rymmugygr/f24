@@ -5,6 +5,7 @@ namespace App\Service\Cbr;
 use App\Service\Cbr\Dto\DailyCurrency\Response as DailyCurrencyResponse;
 use App\Service\Cbr\Exception\RequestException;
 use App\Service\Cbr\Exception\XmlParseException;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -30,12 +31,20 @@ class Client
     private const DATE_FORMAT = "d/m/Y";
     private const RESPONSE_FORMAT = 'xml';
 
+    // Общий lock на все запросы к cbr.ru, чтобы параллельные процессы не обращались к ЦБ одновременно
+    private const LOCK_KEY = 'cbr:request';
+    // TTL lock в секундах, с запасом больше максимальной длительности HTTP запроса, чтобы lock не истёк во время запроса
+    private const LOCK_TTL = 90.0;
+    private const REQUEST_MAX_DURATION = 60.0;
+
     private HttpClientInterface $client;
+    private LockFactory $lockFactory;
     private SerializerInterface $serializer;
 
-    public function __construct(HttpClientInterface $client)
+    public function __construct(HttpClientInterface $client, LockFactory $lockFactory)
     {
         $this->client = $client;
+        $this->lockFactory = $lockFactory;
         $this->serializer = self::createSerializer();
     }
 
@@ -71,21 +80,48 @@ class Client
     {
         $url = str_replace("{date}", $date->format(self::DATE_FORMAT), self::GET_DAILY_CURRENCY);
 
-        try {
-            $response = $this->client->request('GET', $url);
-            if ($response->getStatusCode() !== 200) {
-                throw new RequestException("App\Service\Cbr\Client: request {$url} returned status code {$response->getStatusCode()}");
-            }
-        }  catch (TransportExceptionInterface $e) {
-            throw new RequestException($e->getMessage());
-        }
+        $content = $this->request($url);
 
         try {
-            $dto = $this->serializer->deserialize($response->getContent(), DailyCurrencyResponse::class, self::RESPONSE_FORMAT);
+            $dto = $this->serializer->deserialize($content, DailyCurrencyResponse::class, self::RESPONSE_FORMAT);
         } catch (ExceptionInterface $e) {
             throw new XmlParseException($e->getMessage());
         }
 
         return $dto;
+    }
+
+    /**
+     * Выполняет GET запрос к cbr.ru под lock и возвращает тело ответа
+     * Если lock занят другим процессом, ожидает его освобождения
+     *
+     * @throws RequestException
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    private function request(string $url): string
+    {
+        $lock = $this->lockFactory->createLock(self::LOCK_KEY, self::LOCK_TTL);
+
+        try {
+            $lock->acquire(true);
+        } catch (\Symfony\Component\Lock\Exception\ExceptionInterface $e) {
+            throw new RequestException("App\Service\Cbr\Client: could not acquire lock for {$url}: {$e->getMessage()}", 0, $e);
+        }
+
+        try {
+            // Тело читаем внутри lock, т.к. ответ HttpClient ленивый и запрос фактически выполняется при чтении
+            $response = $this->client->request('GET', $url, ['max_duration' => self::REQUEST_MAX_DURATION]);
+            if ($response->getStatusCode() !== 200) {
+                throw new RequestException("App\Service\Cbr\Client: request {$url} returned status code {$response->getStatusCode()}");
+            }
+
+            return $response->getContent();
+        } catch (TransportExceptionInterface $e) {
+            throw new RequestException($e->getMessage());
+        } finally {
+            $lock->release();
+        }
     }
 }

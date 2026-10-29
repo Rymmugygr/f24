@@ -1,0 +1,3 @@
+framework:
+    # Хранилище lock — redis через уже настроенный Predis клиент (см. services.yaml)
+    lock: 'Predis\ClientInterface'
