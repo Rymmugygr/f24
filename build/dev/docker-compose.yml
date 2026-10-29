@@ -11,6 +11,7 @@ services:
       - db
       - broker
       - redis
+      - worker
     networks:
       - "f24-network"
 
@@ -63,6 +64,23 @@ services:
     command: ["redis-server", "--save", "", "--appendonly", "no", "--requirepass", "pass"]
     networks:
         - "f24-network"
+
+  worker:
+      container_name: worker
+      build:
+          context: ../../
+          dockerfile: build/dev/php-fpm/Dockerfile
+      volumes:
+          - ../..:/var/www
+      user: "www-data"
+      command: [ "bin/console", "app:currency:worker" ]
+      restart: unless-stopped
+      depends_on:
+          - db
+          - broker
+          - redis
+      networks:
+          - "f24-network"
 
 networks:
   f24-network:

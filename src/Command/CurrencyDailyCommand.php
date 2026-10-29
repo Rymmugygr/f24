@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Model\Currency;
 use App\UseCase\GetDailyCurrencyRates;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     description: 'Get daily currency rates for each day from cbr.ru',
 )]
 class CurrencyDailyCommand{
-    const DATE_FORMAT = 'Y-m-d';
+    private const DATE_FORMAT = 'Y-m-d';
 
     public function __construct(
         private readonly GetDailyCurrencyRates $getDailyCurrencyRates,

@@ -1,0 +1,44 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            sync: 'sync://'
+
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    exchange:
+                        name: currency_daily_failed
+                        type: direct
+                        default_publish_routing_key: failed
+                    queues:
+                        failed:
+                            binding_keys: [failed]
+
+            currency_daily:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    exchange:
+                        name: currency_daily
+                        type: direct
+                        default_publish_routing_key: currency_daily
+                    queues:
+                        currency_daily:
+                            binding_keys: [currency_daily]
+                retry_strategy:
+                    max_retries: 3
+                    delay: 2000
+                    multiplier: 2
+
+        routing:
+            # Route your messages to the transports
+            'App\Message\CurrencyDailyMessage': currency_daily
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                currency_daily: 'in-memory://'
+                failed: 'in-memory://'
