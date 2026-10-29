@@ -56,6 +56,7 @@ final class CurrencyController extends AbstractController
             );
         } catch (UseCaseExecuteException $e) {
             $this->logger->error($e->getMessage());
+            var_dump($e->getMessage());
             return $this->internalError("Failed to receive exchange rates");
         }
 

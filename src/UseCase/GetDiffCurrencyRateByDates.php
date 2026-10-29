@@ -13,7 +13,7 @@ class GetDiffCurrencyRateByDates
      * Дата деноминации и перехода с кода RUR на RUB
      * Для упрощения отсекаем все что раньше, иначе пришлось бы заниматься конвертациями RUR -> RUB
      */
-    private const DEADLINE_DATE = '01-01-1998'; //
+    private const DEADLINE_DATE = '02-01-1998'; //
 
     public function __construct(
         private readonly LoggerInterface $logger,

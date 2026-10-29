@@ -4,10 +4,6 @@ ENV TERM xterm
 
 WORKDIR /var/www
 
-RUN apk add libpq-dev \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql
-
 RUN apk add --no-cache rabbitmq-c \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS rabbitmq-c-dev linux-headers \
     && pecl install amqp-2.1.2 \
