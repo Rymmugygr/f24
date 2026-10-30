@@ -2,6 +2,7 @@
 
 # Running dev environment
 up:
+	make install && \
 	docker-compose -f build/dev/docker-compose.yml -p f24 up --build --force-recreate --remove-orphans -d gateway
 
 # Stopping dev environment

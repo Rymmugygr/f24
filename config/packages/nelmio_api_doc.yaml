@@ -51,7 +51,7 @@ nelmio_api_doc:
                                         $ref: '#/components/schemas/HealthResponse'
             '/api/v1.0/metrics':
                 get:
-                    summary: 'Get the number of messages in RabbitMQ queues'
+                    summary: 'Get metrics'
                     description: 'Returns metrics in Prometheus text format for queues currency_daily and currency_daily_failed'
                     tags: ['Service']
                     responses:
@@ -79,12 +79,13 @@ nelmio_api_doc:
                     tags: ['Currency']
                     parameters:
                         - name: date
-                          description: 'The date in format YYYY-MM-DD'
+                          description: 'The date in format YYYY-MM-DD. Must be strictly after 1998-01-01 and not in the future'
                           in: query
                           required: true
                           schema:
                             type: string
                             format: date
+                            example: '2026-10-15'
                         - name: from
                           description: 'The currency which you want to get from'
                           in: query

@@ -9,11 +9,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 final class ConvertCurrencyRequest
 {
     public const DATE_FORMAT = 'Y-m-d';
+    public const MIN_DATE = '1998-01-01';
 
     public function __construct(
         #[Assert\Sequentially([
             new Assert\NotBlank(message: "Parameter 'date' is required"),
             new Assert\Date(message: "Parameter 'date' must be a valid date in format YYYY-MM-DD"),
+            new Assert\GreaterThan(value: self::MIN_DATE, message: "Parameter 'date' must be greater than {{ compared_value }}"),
         ])]
         public readonly string $date,
 
